@@ -1,0 +1,62 @@
+levels                                          
+    | example level
+        - layout
+            | # # # # # # #
+            | # . . . . # #
+            | # . . . . . #
+            | # . . . . . #
+            | # . . > ^ . #
+            | # . . . . . #
+            | # . . . . . #
+            | # # # # # # #
+        
+        - robots
+            | Robot 1
+                * position (1, 3)
+                * color (red)
+                * selected ( true )
+                * strength ( infinite )
+
+            | robot 2
+                * color (green)
+                * position ( 1, 4 )
+                * strength ( 1 )
+                * selected (false)
+
+        - storages
+            |  Blauwe opslagplaats
+                * position ( 5, 2 )
+                * color ( blue )
+
+            |  Rode opslagplaats
+                * position (3,6 )
+                * color ( red )
+
+            |  Groene opslagplaats
+                * position ( 5,5)
+                * color ( green )
+
+        - crates
+            | Blauwe kist
+                * position ( 2, 3 )
+                * weight ( 1 )
+                * color ( blue )
+            
+            | groene kist
+                * position (4, 5)
+                * weight ( 1 )
+                * color (green)
+
+            | rode kist
+                * position ( 3, 5 )
+                * weight (1)
+                * color (red)
+        - spots
+            | Rode vlek
+                * position ( 5,6 )
+                * color ( red )
+                * durability ( 5 )
+            | Blauwe vlek
+                * position (1,2)
+                * color ( blue )
+                * durability ( 5 )
