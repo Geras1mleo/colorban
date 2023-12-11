@@ -4,7 +4,6 @@ import Data
 import Parser.LayoutParser (parseLayout)
 import Parser.MyParser
 import Parser.RobotsParser
-import Text.Parsec.String
 
 testParse :: Parser (Layout, [Robot])
 testParse = do

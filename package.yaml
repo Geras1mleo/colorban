@@ -35,6 +35,8 @@ ghc-options:
 
 library:
   source-dirs: lib
+  dependencies:
+    - parsec
 
 executables:
   colorban-v2-exe:
@@ -46,6 +48,9 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - colorban-v2
+    - gloss >=1.13 && <1.14
+    - bmp >=1.2 && <1.3
+    - random >= 1.1 && < 1.4
 
 tests:
   colorban-v2-test:
@@ -57,3 +62,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - colorban-v2
+    - hspec

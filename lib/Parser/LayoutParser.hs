@@ -1,14 +1,7 @@
 module Parser.LayoutParser (parseLayout) where
 
-import Control.Monad (void)
-import Data
-  ( Layout (..),
-    Tile (Tile, tcoordinate, ttype),
-    TileType,
-  )
-import Parser.MyParser (whitespace)
-import Text.Parsec (char, many1, oneOf, string, try)
-import Text.Parsec.String (Parser)
+import Data (Layout (..), Tile (..), TileType)
+import Parser.MyParser (Parser, char, many1, oneOf, string, try, whitespace, void)
 
 parseLayoutChar :: Parser TileType
 parseLayoutChar = do

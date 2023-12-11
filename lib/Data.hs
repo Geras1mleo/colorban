@@ -1,3 +1,5 @@
+{-# LANGUAGE InstanceSigs #-}
+
 module Data
   ( Direction,
     Coordinate,

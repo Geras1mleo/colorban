@@ -1,8 +1,9 @@
 module Main (main) where
 
+import Data (Coordinate, FColor (..), FieldObject (..), TileType (..), World (..))
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
-import Lib (Coordinate, FieldColor (..), FieldObject (..), FieldType (..), World (..), initWorld, move)
+import Lib (initWorld, move)
 import Static (down, fieldSize, fps, height, left, margin, right, scaleBy, up, width, windowPosition)
 
 imagesPath :: [FilePath]
@@ -23,18 +24,16 @@ imagesPath =
     "assets/wall_50x50.bmp"
   ]
 
-mapColor :: FieldColor -> Int
+mapColor :: FColor -> Int
 mapColor Red = 0
 mapColor Blue = 1
 mapColor Green = 2
 mapColor None = 0
 
-mapType :: FieldType -> Int
-mapType Crate = 0
-mapType Storage = 1
-mapType Paint = 2
-mapType Robot = 3
-mapType Wall = 4
+mapType :: TileType -> Int
+mapType Empty = 0
+mapType Wall = 1
+mapType Normal = 2
 
 convert :: Coordinate -> (Float, Float)
 convert (x, y) =
@@ -48,7 +47,7 @@ construct images (FieldObject coord _ftype _fcolor) = translate x y $ images !! 
     (x, y) = convert coord
 
 renderFields :: [Picture] -> World -> Picture
-renderFields images world = Pictures $ (construct images <$> objects world) ++ [construct images $ robot world]
+renderFields images world = Pictures $ (construct images <$> objects world) ++ [construct images $ head $ objects world] -- not correct
 
 renderBackground :: Picture
 renderBackground = Color (greyN 0.9) $ rectangleSolid (fromIntegral $ width * fieldSize) (fromIntegral $ height * fieldSize)
@@ -73,7 +72,6 @@ window =
       round (fromIntegral (height * fieldSize + 2 * margin) * scaleBy)
     )
     windowPosition
-
 
 -- Hulpfunctie die nagaat of een bepaalde toets is ingedrukt.
 isKey :: SpecialKey -> Event -> Bool

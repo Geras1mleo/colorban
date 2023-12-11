@@ -1,22 +1,7 @@
 module Parser.RobotsParser (parseRobots) where
 
-import Control.Monad (void)
 import Data (Robot (..))
-import Parser.MyParser
-  ( capitalized,
-    readDouble,
-    parseArray,
-    parseField,
-    whitespace, trim,
-  )
-import Text.Parsec
-  ( between,
-    char,
-    many1,
-    noneOf,
-    try,
-  )
-import Text.Parsec.String (Parser)
+import Parser.MyParser (Parser, between, capitalized, char, many1, noneOf, parseArray, parseField, readDouble, trim, try, void, whitespace)
 
 getRobot :: Robot
 getRobot =
