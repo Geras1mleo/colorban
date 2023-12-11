@@ -1,0 +1,10 @@
+2023-12-08 21:41:01.612486858000 [133259(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:42:47.921673917000 [133340(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:45:39.657433225000 [133773(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:46:27.070743476000 [133868(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:54:20.144501891000 [137599(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:55:14.223681513000 [137712(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:55:32.628803400000 [137782(ThreadId 9)] ERROR APP - <file descriptor: 25>: hPutChar: resource vanished (Broken pipe)
+2023-12-08 21:55:57.104139450000 [137841(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:55:59.213682173000 [137868(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.
+2023-12-08 21:56:05.318479744000 [137897(ThreadId 9)] ERROR APP - [CRITICAL] can not get the initial ghci prompt.

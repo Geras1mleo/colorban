@@ -1,0 +1,22 @@
+        - layout
+            | # # # # # #  
+            | # . . . . # #
+            | # . . . . . #
+            | # . . . . . #
+            | # . . > ^ . #
+            | # . . . . . #
+            | # . . . . . #
+            |   # # # # # #
+
+        - robots
+            | Robot 1
+                * position (1, 3)
+                * color     (red )
+                * selected ( true )
+                * strength ( infinite )
+
+            | robot 2
+                * color (green)
+                * position ( 1, 4 )
+                * strength ( 1 )
+                * selected (false)

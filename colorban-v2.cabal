@@ -25,15 +25,24 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Static
+      Data
+      Parser.MyParser
+      Parser.LevelsParser
+      Parser.RobotsParser
+      Parser.LayoutParser
   other-modules:
       Paths_colorban_v2
   autogen-modules:
       Paths_colorban_v2
   hs-source-dirs:
       lib
+      lib/Parser
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , gloss >=1.13 && <1.14
+    , parsec
   default-language: Haskell2010
 
 executable colorban-v2-exe
@@ -48,6 +57,9 @@ executable colorban-v2-exe
   build-depends:
       base >=4.7 && <5
     , colorban-v2
+    , gloss >=1.13 && <1.14
+    , bmp >=1.2 && <1.3
+    , random >= 1.1 && < 1.4
   default-language: Haskell2010
 
 test-suite colorban-v2-test
@@ -55,6 +67,9 @@ test-suite colorban-v2-test
   main-is: Spec.hs
   other-modules:
       Paths_colorban_v2
+      Lib
+      Data
+      Static
   autogen-modules:
       Paths_colorban_v2
   hs-source-dirs:
@@ -63,4 +78,5 @@ test-suite colorban-v2-test
   build-depends:
       base >=4.7 && <5
     , colorban-v2
+    , hspec
   default-language: Haskell2010
