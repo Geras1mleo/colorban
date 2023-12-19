@@ -1,4 +1,4 @@
-module Static (left, right, up, down, width, height, margin, fps, windowPosition, fieldSize, scaleBy) where
+module Static (left, right, up, down, margin, fps, windowPosition, fieldSize, scaleBy) where
 
 import Data (Direction)
 
@@ -8,14 +8,6 @@ up = (0, -1)
 down = (0, 1)
 right = (1, 0)
 left = (-1, 0)
-
--- Aantal tegels op de x-as.
-width :: Int
-width = 7
-
--- Aantal tegels op de y-as.
-height :: Int
-height = 7
 
 -- De ruimte langs de randen van het speelveld.
 margin :: Int

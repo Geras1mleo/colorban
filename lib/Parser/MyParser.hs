@@ -1,9 +1,11 @@
-module Parser.MyParser (regularParse, parseWithLeftOver, whitespace, parseArray, readDouble, parseField, trim, capitalized, char, noneOf, oneOf, string, anyToken, between, eof, many1, manyTill, many, parse, try, void, ParseError, Parser) where
+module Parser.MyParser (regularParse, parseWithLeftOver, whitespace, parseArray, readDouble, parseFields, trim, capitalized, char, noneOf, oneOf, string, anyToken, between, eof, many1, manyTill, many, parse, try, void, anyChar, ParseError, Parser, parseFields1, parseName, parseFieldArray1, parseTabsCount, count, parseTab, whitespaceTillNewLine, parseTabs) where
 
-import Control.Monad (void)
 import Data.Char (isSpace, toLower, toUpper)
+import Data.Functor (void, ($>))
 import Data.List (dropWhileEnd)
-import Text.Parsec (ParseError, anyToken, between, char, eof, many, many1, manyTill, noneOf, oneOf, parse, string, try)
+import Text.Parsec (anyChar, anyToken, between, char, count, eof, many, many1, manyTill, noneOf, oneOf, parse, string, try)
+import Text.Parsec.Error
+import Text.Parsec.Prim ((<|>))
 import Text.Parsec.String (Parser)
 
 trim :: String -> String
@@ -26,17 +28,56 @@ parseWithLeftOver p fname = do
 whitespace :: Parser ()
 whitespace = void $ many $ oneOf " \n\t"
 
-parseArray :: String -> Parser a -> Parser [a]
-parseArray name elemParser = whitespace >> void (string ("- " ++ name)) >> many1 (try elemParser)
+whitespaceTillNewLine :: Parser ()
+whitespaceTillNewLine = void $ many $ try $ many (char ' ') >> char '\n'
 
-parseField :: Parser (String, String)
-parseField = do
+parseTab :: Parser String
+parseTab = string "    " $> "\t" <|> char '\t' $> "\t"
+
+parseTabsCount :: Parser Int
+parseTabsCount = many parseTab >>= \arr -> return $ length arr
+
+parseTabs :: Int -> Parser [String]
+parseTabs c = whitespaceTillNewLine >> count c parseTab
+
+parseArray :: String -> Parser a -> Parser [a]
+parseArray name elemParser =
+  try
+    ( do
+        whitespaceTillNewLine
+        tabsCount <- parseTabsCount
+        void $ try (string ("- " ++ name))
+        many
+          ( try
+              ( parseTabs (tabsCount + 1)
+                  >> char '|'
+                  >> elemParser
+              )
+          )
+          <|> return []
+    )
+    <|> return []
+
+parseFieldWithPrefix :: Char -> Parser (String, String)
+parseFieldWithPrefix prefix = do
   whitespace
-  void $ char '*'
-  key <- between (char ' ') (char ' ') (many1 (noneOf " "))
+  void $ char prefix
+  key <- between (char ' ') (char ' ') (many1 (noneOf " ")) -- TODO manyTill
   whitespace
   value <- between (char '(') (char ')') (many1 (noneOf ")"))
   return (trim key, trim value)
+
+parseFields :: Parser [(String, String)]
+parseFields = many $ try (parseFieldWithPrefix '*')
+
+parseFields1 :: Parser [(String, String)]
+parseFields1 = many1 $ try (parseFieldWithPrefix '*')
+
+parseFieldArray1 :: Parser [(String, String)]
+parseFieldArray1 = many1 $ try (parseFieldWithPrefix '|')
+
+parseName :: Parser String
+parseName = between (char ' ') (char '\n') (many1 (noneOf "\n")) >>= \s -> return (trim s)
 
 readDouble :: String -> Double
 readDouble "infinite" = 1 / 0

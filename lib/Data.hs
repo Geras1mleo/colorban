@@ -1,27 +1,37 @@
 {-# LANGUAGE InstanceSigs #-}
 
-module Data
-  ( Direction,
-    Coordinate,
-    FColor (..),
-    BoardObject (..),
-    TileType (..),
-    Robot (..),
-    Tile (..),
-    FieldObject (..),
-    Layout (..),
-    World (..),
-  )
-where
+module Data (Direction, Coordinate, Dimentions, FColor (..), TileType (..), Robot (..), Tile (..), Storage (..), Crate (..), Spot (..), Layout (..), IntF (..), isInfinity, Door (..), Button (..), Platform (..), Coin (..), Level (..), width, height, decrement, positive) where
 
-import Data.Char (isAlpha)
-
-class BoardObject b where
-  coordinate :: b -> Coordinate
+import Data.Char (isAlpha, isAlphaNum)
 
 type Direction = (Int, Int)
 
 type Coordinate = (Int, Int)
+
+type Dimentions = (Int, Int)
+
+data IntF = Infinity | Natural Int
+  deriving (Eq, Show)
+
+isInfinity :: IntF -> Bool
+isInfinity Infinity = True
+isInfinity (Natural _) = False
+
+readIntF :: String -> IntF
+readIntF "infinite" = Infinity
+readIntF str = Natural $ read str
+
+decrement :: IntF -> IntF
+decrement (Natural a)= Natural $ a-1
+decrement _ = Infinity
+
+positive :: IntF -> Bool
+positive (Natural a) = a > 0
+positive _ = True
+
+instance Read IntF where
+  readsPrec :: Int -> ReadS IntF
+  readsPrec _ str = let (str', rest) = span isAlphaNum str in [(readIntF str', rest)]
 
 data FColor
   = Blue
@@ -86,19 +96,11 @@ data Robot = Robot
   }
   deriving (Eq, Show)
 
-instance BoardObject Robot where
-  coordinate :: Robot -> Coordinate
-  coordinate = rcoordinate
-
 data Tile = Tile
   { ttype :: TileType,
     tcoordinate :: Coordinate
   }
   deriving (Eq, Show)
-
-instance BoardObject Tile where
-  coordinate :: Tile -> Coordinate
-  coordinate = tcoordinate
 
 data Storage = Storage
   { sname :: String,
@@ -106,10 +108,6 @@ data Storage = Storage
     scolor :: FColor
   }
   deriving (Eq, Show)
-
-instance BoardObject Storage where
-  coordinate :: Storage -> Coordinate
-  coordinate = scoordinate
 
 data Crate = Crate
   { cname :: String,
@@ -119,37 +117,68 @@ data Crate = Crate
   }
   deriving (Eq, Show)
 
-instance BoardObject Crate where
-  coordinate :: Crate -> Coordinate
-  coordinate = ccoordinate
-
 data Spot = Spot
-  { pname :: String,
-    pcoordinate :: Coordinate,
-    pcolor :: FColor,
-    durability :: Int
+  { spname :: String,
+    spcoordinate :: Coordinate,
+    spcolor :: FColor,
+    durability :: IntF
   }
   deriving (Eq, Show)
-
-instance BoardObject Spot where
-  coordinate :: Spot -> Coordinate
-  coordinate = pcoordinate
 
 data Layout = Layout
   { tiles :: [Tile],
-    dimentions :: (Int, Int)
+    dimentions :: Dimentions
   }
   deriving (Eq, Show)
 
-data FieldObject = FieldObject
-  { fcoordinate :: Coordinate,
-    ftype :: TileType,
-    fcolor :: FColor
+data Button = Button
+  { bcoordinate :: Coordinate,
+    isPressed :: Bool
   }
   deriving (Eq, Show)
 
-data World = World
-  { objects :: [FieldObject],
-    robot :: Robot
+data Door = Door
+  { dname :: String,
+    doorCoordinate :: Coordinate,
+    buttons :: [Button],
+    isOpened :: Bool
   }
-  deriving (Show)
+  deriving (Eq, Show)
+
+data Platform = Platform
+  { pname :: String,
+    pdimentions :: Dimentions,
+    startCoordinate :: Coordinate,
+    endCoordinate :: Coordinate,
+    probots :: [Robot],
+    pcrates :: [Crate]
+  }
+  deriving (Eq, Show)
+
+data Coin = Coin
+  { coinName :: String,
+    coinCoordinate :: Coordinate,
+    value :: Int
+  }
+  deriving (Eq, Show)
+
+data Level = Level
+  { levelName :: String,
+    layout :: Layout,
+    robots :: [Robot],
+    storages :: [Storage],
+    crates :: [Crate],
+    spots :: [Spot],
+    doors :: [Door],
+    platforms :: [Platform],
+    coins :: [Coin],
+    requiredCoins :: Int,
+    collectedCoins :: Int
+  }
+  deriving (Eq, Show)
+
+width :: Level -> Int
+width l = fst $ dimentions $ layout l
+
+height :: Level -> Int
+height l = snd $ dimentions $ layout l

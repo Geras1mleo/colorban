@@ -1,12 +1,15 @@
 module Parser.LayoutParser (parseLayout) where
 
-import Data (Layout (..), Tile (..), TileType)
-import Parser.MyParser (Parser, char, many1, oneOf, string, try, whitespace, void)
+import Data (Layout (..), Tile (..), TileType, Dimentions)
+import Parser.MyParser (Parser, char, many1, string, try, void, whitespace, anyChar)
+
+getDimentions :: [[a]] -> Dimentions
+getDimentions arr = (maximum (map length arr), length arr)
 
 parseLayoutChar :: Parser TileType
 parseLayoutChar = do
   void $ char ' '
-  f <- oneOf "#. <^>v"
+  f <- anyChar
   return $ read [f]
 
 parseLayoutLine :: Parser [TileType]
@@ -18,9 +21,9 @@ parseLayout = do
   void $ string "- layout"
   field_types <- many1 (try parseLayoutLine)
   let fields_zipped = zip [0 ..] (map (zip [0 ..]) field_types)
-  let _tiles =
+  let tiles' =
         [ Tile {tcoordinate = (x, y), ttype = t}
           | (y, line) <- fields_zipped,
             (x, t) <- line
         ]
-  return Layout {tiles = _tiles, dimentions = (length $ head field_types, length field_types)}
+  return Layout {tiles = tiles', dimentions = getDimentions field_types}

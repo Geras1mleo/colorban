@@ -24,12 +24,20 @@ source-repository head
 
 library
   exposed-modules:
+      BoardObject
       Data
-      Lib
+      Game
+      Parser.ButtonsParser
+      Parser.CoinsParser
+      Parser.CratesParser
+      Parser.DoorsParser
       Parser.LayoutParser
       Parser.LevelsParser
       Parser.MyParser
+      Parser.PlatformsParser
       Parser.RobotsParser
+      Parser.SpotsParser
+      Parser.StoragesParser
       Static
   other-modules:
       Paths_colorban_v2
@@ -46,6 +54,9 @@ library
 executable colorban-v2-exe
   main-is: Main.hs
   other-modules:
+      Assets
+      Drawable
+      LevelRenderer
       Paths_colorban_v2
   autogen-modules:
       Paths_colorban_v2
