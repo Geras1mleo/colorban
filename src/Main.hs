@@ -1,14 +1,16 @@
 module Main (main) where
 
-import Assets (imagesPath)
-import Data
-import LevelRenderer (renderLevel)
-import Game (getPlayedLevel, move)
-import Graphics.Gloss
-import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (MouseButton, SpecialKey), KeyState (Down), MouseButton (LeftButton), SpecialKey (..))
-import Static (down, fieldSize, fps, left, margin, right, scaleBy, up, windowPosition)
+import Data (Level (levelName), height, width)
+import Game (move, selectNextRobot, selectPreviousRobot)
+import Graphics.Gloss (Display (InWindow), Picture, greyN, loadBMP, play)
+import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (Char, MouseButton, SpecialKey), KeyState (Down), MouseButton (LeftButton), SpecialKey (..))
+import LevelRenderer (renderLevel, rgb, Textures)
+import Parser.LevelsParser (parseLevels)
+import Parser.MyParser (regularParse)
+import Static (down, fieldSize, fps, left, margin, right, scaleBy, up, windowPosition, assetsFolder)
+import Directory (getFilesRecursive)
 
-render :: [Picture] -> Level -> Picture
+render :: Textures -> Level -> Picture
 render = renderLevel
 
 handleInput :: Event -> Level -> Level
@@ -17,6 +19,8 @@ handleInput event level
   | isKey KeyUp event = move level up
   | isKey KeyLeft event = move level left
   | isKey KeyDown event = move level down
+  | isKey' 'n' event = selectNextRobot level
+  | isKey' 'p' event = selectPreviousRobot level
   | otherwise = level
 
 window :: Level -> Display
@@ -29,17 +33,26 @@ window l =
     windowPosition
 
 isKey :: SpecialKey -> Event -> Bool
-isKey k1 (EventKey (SpecialKey k2) Down _ (x, y)) = {-trace ("x: " ++ show x ++ "y: " ++ show y) $-} k1 == k2
-isKey k1 (EventKey (MouseButton LeftButton) Down _ (x, y)) = {-trace ("x: " ++ show x ++ "y: " ++ show y)-} True
+isKey k1 (EventKey (SpecialKey k2) Down _ _) = k1 == k2
+isKey k1 (EventKey (MouseButton LeftButton) Down _ (x, y)) = False
 isKey _ _ = False
+
+isKey' :: Char -> Event -> Bool
+isKey' k1 (EventKey (Char k2) Down _ _) = k1 == k2
+isKey' _ _ = False
 
 step :: Float -> Level -> Level
 step _ l = l
 
 main :: IO ()
 main = do
-  images <- mapM loadBMP imagesPath
-  config <- readFile "levels/example.txt"
-  let level = getPlayedLevel config
+  paths <- getFilesRecursive assetsFolder
+  images <- mapM loadBMP paths
+  let images' = zip paths images
+  config <- readFile "levels/example2.txt"
+  let levels = regularParse parseLevels config
+  let level = case levels of
+        Left err -> error $ show err
+        Right levels' -> head levels'
   print level
-  play (window level) (greyN 0.1) fps level (render images) handleInput step
+  play (window level) (rgb (58, 58, 58)) fps level (render images') handleInput step

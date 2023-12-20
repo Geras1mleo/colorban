@@ -1,10 +1,10 @@
-module Game (move, isSolved, getPlayedLevel) where
+module Game (move, isSolved, selectNextRobot, selectPreviousRobot) where
 
 import BoardObject (BoardObject (..))
-import Data
+import Data (Button (isPressed), Coin (value), Coordinate, Crate (ccoordinate, weight), Direction, Door (buttons, isOpened), Layout (tiles), Level (coins, collectedCoins, crates, doors, layout, robots, spots), Robot (rcolor, rcoordinate, selected, strength), Spot (durability, spcolor), Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall), decrement, positive)
+import Data.List (elemIndex)
+import Data.Maybe (fromMaybe)
 import Debug.Trace (trace)
-import Parser.LevelsParser (parseLevels)
-import Parser.MyParser (regularParse)
 import Static (down, left, right, up)
 
 replaceFirst :: (Eq a) => a -> a -> [a] -> [a]
@@ -15,13 +15,6 @@ replaceFirst old new (x : xs)
 
 filter' :: (BoardObject a) => Coordinate -> [a] -> [a]
 filter' coord = filter (\c -> coordinate c == coord)
-
-getPlayedLevel :: String -> Level
-getPlayedLevel input = do
-  let levels = regularParse parseLevels input
-  case levels of
-    Left err -> error $ show err
-    Right levels' -> head levels' -- TODO
 
 newCoordinate :: (BoardObject a) => a -> Direction -> Coordinate
 newCoordinate a (dx, dy) = (x + dx, y + dy)
@@ -124,10 +117,7 @@ handleSpots level =
     newSpots _ = error ("Multiple spots on coordinate: " ++ show coord)
 
 handleDoorsAndButtons :: Level -> Level
-handleDoorsAndButtons level =
-  level
-    { doors = newDoors
-    }
+handleDoorsAndButtons level = level {doors = newDoors}
   where
     buttons' = concatMap buttons $ doors level
     pressedButtons = concat $ (filter'' <$> crates level) ++ (filter'' <$> robots level)
@@ -161,13 +151,30 @@ move level direction
       let level' = moveRobot level robot coord direction
        in let level'' = handleSpots level'
            in let level''' = handleDoorsAndButtons level''
-              in let level'''' = handleCoins level'''
-               in trace (show level'''') level''''
+               in let level'''' = handleCoins level'''
+                   in trace (show level'''') level''''
   | otherwise = level
   where
     robot = getSelectedRobot level
     coord = coordinate robot
     canPush' = canPush level robot (strength robot) direction
+
+selectRobot :: (Int -> Int) -> Level -> Level
+selectRobot f level = trace (show newRobots ++ "\n" ++ show currentIndex ++ "\n" ++ show ((f currentIndex + robotsCount) `mod` robotsCount)) $ level {robots = newRobots}
+  where
+    robotsCount = length $ robots level
+    currentSelected = getSelectedRobot level
+    currentIndex = fromMaybe undefined $ elemIndex currentSelected (robots level)
+    nextSelected = robots level !! ((f currentIndex + robotsCount) `mod` robotsCount)
+    newRobots =
+      replaceFirst nextSelected (nextSelected {selected = True}) $
+        replaceFirst currentSelected (currentSelected {selected = False}) (robots level)
+
+selectNextRobot :: Level -> Level
+selectNextRobot = selectRobot (+ 1)
+
+selectPreviousRobot :: Level -> Level
+selectPreviousRobot = selectRobot (flip (-) 1)
 
 isSolved :: Level -> Bool
 isSolved = undefined

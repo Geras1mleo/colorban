@@ -3,16 +3,16 @@
 module Drawable (Drawable (..)) where
 
 import BoardObject (BoardObject (..))
-import Data
+import Data (Button, Coin (value), Crate (weight), Door (isOpened), IntF (..), Platform, Robot (strength), Spot (durability), Storage, Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall))
 import Data.Char (toLower)
-import Graphics.Gloss.Data.Picture hiding (color)
+import Graphics.Gloss.Data.Picture (Picture (Pictures, Scale, Text, Translate))
 
 dropPointZero :: String -> String
 dropPointZero num = if mantissa == ".0" then intPart else num
   where
     (intPart, mantissa) = break (== '.') num
 
-showNum :: (Num a, Show a) => a -> String
+showNum :: (Show a) => a -> String
 showNum = dropPointZero . show
 
 showDouble :: (RealFloat a, Show a) => a -> String

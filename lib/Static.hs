@@ -1,4 +1,4 @@
-module Static (left, right, up, down, margin, fps, windowPosition, fieldSize, scaleBy) where
+module Static (left, right, up, down, margin, fps, windowPosition, fieldSize, scaleBy, thickLineOffsetsCount, assetsFolder) where
 
 import Data (Direction)
 
@@ -24,6 +24,13 @@ fps = 60
 windowPosition :: (Int, Int)
 windowPosition = (500, 100)
 
+-- Voor implementatie van thickLine
+thickLineOffsetsCount :: Integer
+thickLineOffsetsCount = 5
+
 -- De afmetingen van een tegel.
 fieldSize :: Int
 fieldSize = 50
+
+assetsFolder :: String
+assetsFolder = "./assets/"

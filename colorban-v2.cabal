@@ -54,7 +54,7 @@ library
 executable colorban-v2-exe
   main-is: Main.hs
   other-modules:
-      Assets
+      Directory
       Drawable
       LevelRenderer
       Paths_colorban_v2
@@ -67,6 +67,8 @@ executable colorban-v2-exe
       base >=4.7 && <5
     , bmp ==1.2.*
     , colorban-v2
+    , directory ==1.3.*
+    , filepath ==1.4.*
     , gloss ==1.13.*
     , random >=1.1 && <1.4
   default-language: Haskell2010
