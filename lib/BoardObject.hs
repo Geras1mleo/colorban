@@ -2,7 +2,7 @@
 
 module BoardObject (BoardObject (..)) where
 
-import Data (Button (bcoordinate), Coin (coinCoordinate), Coordinate, Crate (ccolor, ccoordinate), Door (doorCoordinate), FColor (None), Platform (startCoordinate), Robot (rcolor, rcoordinate), Spot (spcolor, spcoordinate), Storage (scolor, scoordinate), Tile (tcoordinate))
+import GameData(Button (bcoordinate), Coin (coinCoordinate), Coordinate, Crate (ccolor, ccoordinate), Door (doorCoordinate), FColor (None), Platform (startCoordinate), Robot (rcolor, rcoordinate), Spot (spcolor, spcoordinate), Storage (scolor, scoordinate), Tile (tcoordinate))
 
 data ObjectType
   = TRobot

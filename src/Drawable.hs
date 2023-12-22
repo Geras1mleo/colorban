@@ -3,7 +3,7 @@
 module Drawable (Drawable (..)) where
 
 import BoardObject (BoardObject (..))
-import Data (Button, Coin (value), Crate (weight), Door (isOpened), IntF (..), Platform, Robot (strength), Spot (durability), Storage, Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall))
+import GameData(Button, Coin (value), Crate (weight), Door (isOpened), IntF (..), Platform, Robot (strength), Spot (durability), Storage, Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall))
 import Data.Char (toLower)
 import Graphics.Gloss.Data.Picture (Picture (Pictures, Scale, Text, Translate))
 

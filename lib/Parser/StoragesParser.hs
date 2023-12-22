@@ -1,6 +1,6 @@
 module Parser.StoragesParser (parseStorages) where
 
-import Data (Storage (..))
+import GameData(Storage (..))
 import Parser.MyParser (Parser, parseArray, parseFields1, parseName)
 
 getStorage :: Storage

@@ -3,7 +3,7 @@
 module LevelRenderer (renderLevel, rgb, rgba, Textures) where
 
 import BoardObject (BoardObject (coordinate))
-import Data (Button (isPressed), Coordinate, Door (buttons), Layout (tiles), Level (coins, crates, doors, layout, platforms, robots, spots, storages), height, width)
+import GameData(Button (isPressed), Coordinate, Door (buttons), Layout (tiles), Level (coins, crates, doors, layout, platforms, robots, spots, storages), height, width)
 import Data.List (find)
 import Data.Maybe (fromMaybe)
 import Drawable (Drawable (draw, getImagePath))

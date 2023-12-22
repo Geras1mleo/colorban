@@ -1,6 +1,6 @@
 module Parser.CratesParser (parseCrates) where
 
-import Data (Crate (..))
+import GameData(Crate (..))
 import Parser.MyParser (Parser, parseArray, parseFields1, parseName, readDouble)
 
 getCrate :: Crate

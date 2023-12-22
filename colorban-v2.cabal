@@ -25,8 +25,9 @@ source-repository head
 library
   exposed-modules:
       BoardObject
-      Data
       Game
+      GameData
+      Helper
       Parser.ButtonsParser
       Parser.CoinsParser
       Parser.CratesParser
@@ -56,7 +57,9 @@ executable colorban-v2-exe
   other-modules:
       Directory
       Drawable
+      GameWindow
       LevelRenderer
+      MenuWindow
       Paths_colorban_v2
   autogen-modules:
       Paths_colorban_v2

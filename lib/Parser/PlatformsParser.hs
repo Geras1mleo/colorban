@@ -1,6 +1,6 @@
 module Parser.PlatformsParser (parsePlatforms) where
 
-import Data (Platform (..))
+import GameData(Platform (..))
 import Parser.MyParser (Parser, parseArray, parseFields1, parseName)
 
 getPlatform :: Platform

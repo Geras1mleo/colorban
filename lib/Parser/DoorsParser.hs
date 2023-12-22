@@ -1,6 +1,6 @@
 module Parser.DoorsParser (parseDoors) where
 
-import Data (Door (..))
+import GameData(Door (..))
 import Parser.MyParser (Parser, parseArray, parseFields1, parseName)
 import Parser.ButtonsParser (parseButtons)
 

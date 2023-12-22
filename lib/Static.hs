@@ -1,6 +1,6 @@
-module Static (left, right, up, down, margin, fps, windowPosition, fieldSize, scaleBy, thickLineOffsetsCount, assetsFolder) where
+module Static (left, right, up, down, margin, fps, windowPosition, fieldSize, scaleBy, thickLineOffsetsCount, assetsFolder, configFile) where
 
-import Data (Direction)
+import GameData (Direction)
 
 -- De mogelijke richtingen van de selector.
 left, right, up, down :: Direction
@@ -11,7 +11,7 @@ left = (-1, 0)
 
 -- De ruimte langs de randen van het speelveld.
 margin :: Int
-margin = 20
+margin = 0
 
 scaleBy :: Float
 scaleBy = 1.25
@@ -34,3 +34,6 @@ fieldSize = 50
 
 assetsFolder :: String
 assetsFolder = "./assets/"
+
+configFile :: String
+configFile = "levels/example.txt"

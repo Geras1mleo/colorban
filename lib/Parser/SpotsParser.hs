@@ -1,6 +1,6 @@
 module Parser.SpotsParser (parseSpots) where
 
-import Data (Spot (..))
+import GameData(Spot (..))
 import Parser.MyParser (Parser, parseArray, parseFields1, parseName)
 
 getSpot :: Spot

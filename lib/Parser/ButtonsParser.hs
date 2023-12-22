@@ -1,7 +1,7 @@
 module Parser.ButtonsParser (parseButtons) where
 
 import Control.Monad (void)
-import Data (Button (..))
+import GameData(Button (..))
 import Parser.MyParser (Parser, parseFieldArray1, whitespace, string, try)
 
 getButton :: Button

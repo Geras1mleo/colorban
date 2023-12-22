@@ -1,6 +1,6 @@
 module Parser.LayoutParser (parseLayout) where
 
-import Data (Layout (..), Tile (..), TileType, Dimentions)
+import GameData(Layout (..), Tile (..), TileType, Dimentions)
 import Parser.MyParser (Parser, char, many1, string, try, void, whitespace, anyChar)
 
 getDimentions :: [[a]] -> Dimentions

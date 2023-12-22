@@ -1,10 +1,9 @@
 module Game (move, isSolved, selectNextRobot, selectPreviousRobot) where
 
 import BoardObject (BoardObject (..))
-import Data (Button (isPressed), Coin (value), Coordinate, Crate (ccoordinate, weight), Direction, Door (buttons, isOpened), Layout (tiles), Level (coins, collectedCoins, crates, doors, layout, robots, spots), Robot (rcolor, rcoordinate, selected, strength), Spot (durability, spcolor), Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall), decrement, positive)
 import Data.List (elemIndex)
-import Data.Maybe (fromMaybe)
-import Debug.Trace (trace)
+import Data.Maybe (fromJust)
+import GameData (Button (isPressed), Coin (value), Coordinate, Crate (ccoordinate, weight), Direction, Door (buttons, isOpened), Layout (tiles), Level (coins, collectedCoins, crates, doors, layout, robots, spots, storages, requiredCoins), Robot (rcolor, rcoordinate, selected, strength), Spot (durability, spcolor), Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall), decrement, positive)
 import Static (down, left, right, up)
 
 replaceFirst :: (Eq a) => a -> a -> [a] -> [a]
@@ -152,7 +151,7 @@ move level direction
        in let level'' = handleSpots level'
            in let level''' = handleDoorsAndButtons level''
                in let level'''' = handleCoins level'''
-                   in trace (show level'''') level''''
+                   in level''''
   | otherwise = level
   where
     robot = getSelectedRobot level
@@ -160,15 +159,15 @@ move level direction
     canPush' = canPush level robot (strength robot) direction
 
 selectRobot :: (Int -> Int) -> Level -> Level
-selectRobot f level = trace (show newRobots ++ "\n" ++ show currentIndex ++ "\n" ++ show ((f currentIndex + robotsCount) `mod` robotsCount)) $ level {robots = newRobots}
+selectRobot f level = level {robots = newRobots}
   where
     robotsCount = length $ robots level
-    currentSelected = getSelectedRobot level
-    currentIndex = fromMaybe undefined $ elemIndex currentSelected (robots level)
-    nextSelected = robots level !! ((f currentIndex + robotsCount) `mod` robotsCount)
+    thisRobot = getSelectedRobot level
+    thisIndex = fromJust $ elemIndex thisRobot (robots level)
+    nextRobot = robots level !! ((f thisIndex + robotsCount) `mod` robotsCount)
     newRobots =
-      replaceFirst nextSelected (nextSelected {selected = True}) $
-        replaceFirst currentSelected (currentSelected {selected = False}) (robots level)
+      replaceFirst nextRobot (nextRobot {selected = True}) $
+        replaceFirst thisRobot (thisRobot {selected = False}) (robots level)
 
 selectNextRobot :: Level -> Level
 selectNextRobot = selectRobot (+ 1)
@@ -177,4 +176,8 @@ selectPreviousRobot :: Level -> Level
 selectPreviousRobot = selectRobot (flip (-) 1)
 
 isSolved :: Level -> Bool
-isSolved = undefined
+isSolved level = enoughCoins && cratesSolved
+  where
+    enoughCoins = requiredCoins level <= collectedCoins level
+    cratesSolved = all (\crate -> not $ null $ filter' (coordinate crate) $ storages level) $ crates level
+

@@ -1,6 +1,6 @@
 module Parser.RobotsParser (parseRobots) where
 
-import Data (Robot (..))
+import GameData(Robot (..))
 import Parser.MyParser (Parser, capitalized, parseArray, parseFields1, parseName, readDouble)
 
 getRobot :: Robot

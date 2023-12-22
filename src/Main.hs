@@ -1,58 +1,54 @@
 module Main (main) where
 
-import Data (Level (levelName), height, width)
-import Game (move, selectNextRobot, selectPreviousRobot)
-import Graphics.Gloss (Display (InWindow), Picture, greyN, loadBMP, play)
-import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (Char, MouseButton, SpecialKey), KeyState (Down), MouseButton (LeftButton), SpecialKey (..))
-import LevelRenderer (renderLevel, rgb, Textures)
+import Directory (getFilesRecursive)
+import GameData (GameData (..), WindowType (..))
+import GameWindow (handleInput, render, step)
+import Graphics.Gloss (Display (FullScreen), Picture, loadBMP, play)
+import Graphics.Gloss.Interface.IO.Game (Event)
+import LevelRenderer (Textures, rgb)
+import MenuWindow (handleInput, render, step)
 import Parser.LevelsParser (parseLevels)
 import Parser.MyParser (regularParse)
-import Static (down, fieldSize, fps, left, margin, right, scaleBy, up, windowPosition, assetsFolder)
-import Directory (getFilesRecursive)
+import Static (assetsFolder, configFile, fps)
 
-render :: Textures -> Level -> Picture
-render = renderLevel
+render :: Textures -> GameData -> Picture
+render textures gdata = handle $ windowType gdata
+  where
+    handle MenuWindow = MenuWindow.render textures gdata
+    handle GameWindow = GameWindow.render textures gdata
+    handle EndGameWindow = undefined -- TODO
 
-handleInput :: Event -> Level -> Level
-handleInput event level
-  | isKey KeyRight event = move level right
-  | isKey KeyUp event = move level up
-  | isKey KeyLeft event = move level left
-  | isKey KeyDown event = move level down
-  | isKey' 'n' event = selectNextRobot level
-  | isKey' 'p' event = selectPreviousRobot level
-  | otherwise = level
+handleInput :: Event -> GameData -> GameData
+handleInput event gdata = handle $ windowType gdata
+  where
+    handle MenuWindow = MenuWindow.handleInput event gdata
+    handle GameWindow = GameWindow.handleInput event gdata
+    handle EndGameWindow = undefined -- TODO
 
-window :: Level -> Display
-window l =
-  InWindow
-    ("Colorban -> " ++ levelName l)
-    ( round (fromIntegral (width l * fieldSize + 2 * margin) * scaleBy),
-      round (fromIntegral (height l * fieldSize + 2 * margin) * scaleBy)
-    )
-    windowPosition
-
-isKey :: SpecialKey -> Event -> Bool
-isKey k1 (EventKey (SpecialKey k2) Down _ _) = k1 == k2
-isKey k1 (EventKey (MouseButton LeftButton) Down _ (x, y)) = False
-isKey _ _ = False
-
-isKey' :: Char -> Event -> Bool
-isKey' k1 (EventKey (Char k2) Down _ _) = k1 == k2
-isKey' _ _ = False
-
-step :: Float -> Level -> Level
-step _ l = l
+step :: Float -> GameData -> GameData
+step f gdata = handle $ windowType gdata
+  where
+    handle MenuWindow = MenuWindow.step f gdata
+    handle GameWindow = GameWindow.step f gdata
+    handle EndGameWindow = undefined -- TODO
 
 main :: IO ()
 main = do
   paths <- getFilesRecursive assetsFolder
   images <- mapM loadBMP paths
-  let images' = zip paths images
-  config <- readFile "levels/example2.txt"
-  let levels = regularParse parseLevels config
-  let level = case levels of
-        Left err -> error $ show err
-        Right levels' -> head levels'
-  print level
-  play (window level) (rgb (58, 58, 58)) fps level (render images') handleInput step
+  gdata <- getGameData
+  let textures = zip paths images
+  play FullScreen (rgb (58, 58, 58)) fps gdata (Main.render textures) Main.handleInput Main.step
+
+getGameData :: IO GameData
+getGameData = do
+  config <- readFile configFile
+  let levels' = regularParse parseLevels config
+  return $ case levels' of
+    Left err -> error (show err)
+    Right levels'' ->
+      GameData
+        { windowType = MenuWindow,
+          levels = levels'',
+          playingLevel = Nothing
+        }

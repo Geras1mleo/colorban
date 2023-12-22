@@ -1,8 +1,9 @@
 {-# LANGUAGE InstanceSigs #-}
 
-module Data (Direction, Coordinate, Dimentions, FColor (..), TileType (..), Robot (..), Tile (..), Storage (..), Crate (..), Spot (..), Layout (..), IntF (..), isInfinity, Door (..), Button (..), Platform (..), Coin (..), Level (..), width, height, decrement, positive) where
+module GameData (Direction, Coordinate, Dimentions, FColor (..), TileType (..), Robot (..), Tile (..), Storage (..), Crate (..), Spot (..), Layout (..), IntF (..), isInfinity, Door (..), Button (..), Platform (..), Coin (..), Level (..), width, height, decrement, positive, GameData (..), WindowType (..), getPlayingLevel) where
 
 import Data.Char (isAlpha, isAlphaNum)
+import Data.Maybe (fromMaybe)
 
 type Direction = (Int, Int)
 
@@ -22,7 +23,7 @@ readIntF "infinite" = Infinity
 readIntF str = Natural $ read str
 
 decrement :: IntF -> IntF
-decrement (Natural a)= Natural $ a-1
+decrement (Natural a) = Natural $ a - 1
 decrement _ = Infinity
 
 positive :: IntF -> Bool
@@ -176,6 +177,17 @@ data Level = Level
     collectedCoins :: Int
   }
   deriving (Eq, Show)
+
+data WindowType = MenuWindow | GameWindow | EndGameWindow
+
+data GameData = GameData
+  { windowType :: WindowType,
+    levels :: [Level],
+    playingLevel :: Maybe Level
+  }
+
+getPlayingLevel :: GameData -> Level
+getPlayingLevel = fromMaybe (error "Playing level hasn't been selected") . playingLevel
 
 width :: Level -> Int
 width l = fst $ dimentions $ layout l

@@ -1,6 +1,6 @@
 module Parser.CoinsParser (parseCoins) where
 
-import Data (Coin (..))
+import GameData(Coin (..))
 import Parser.MyParser (Parser, parseArray, parseFields1, parseName)
 
 getCoin :: Coin

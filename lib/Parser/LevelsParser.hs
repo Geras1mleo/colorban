@@ -1,7 +1,7 @@
 module Parser.LevelsParser (parseLevels) where
 
 import Control.Monad (when)
-import Data
+import GameData
 import Parser.CoinsParser (parseCoins)
 import Parser.CratesParser (parseCrates)
 import Parser.DoorsParser (parseDoors)
