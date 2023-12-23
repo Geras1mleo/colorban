@@ -14,7 +14,7 @@ margin :: Int
 margin = 0
 
 scaleBy :: Float
-scaleBy = 1.25
+scaleBy = 1.4
 
 -- Framerate van het spel.
 fps :: Int
@@ -33,7 +33,7 @@ fieldSize :: Int
 fieldSize = 50
 
 assetsFolder :: String
-assetsFolder = "./assets/"
+assetsFolder = "./assets_2/"
 
 configFile :: String
 configFile = "levels/example.txt"

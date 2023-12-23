@@ -6,7 +6,7 @@ import Parser.CoinsParser (parseCoins)
 import Parser.CratesParser (parseCrates)
 import Parser.DoorsParser (parseDoors)
 import Parser.LayoutParser (parseLayout)
-import Parser.MyParser (Parser, anyChar, char, many, many1, parseFields, parseName, parseWithLeftOver, string, try, void, whitespace)
+import Parser.MyParser (Parser, anyChar, char, many, many1, parseFields, parseName, string, try, void, whitespace)
 import Parser.PlatformsParser (parsePlatforms)
 import Parser.RobotsParser (parseRobots)
 import Parser.SpotsParser (parseSpots)
@@ -29,7 +29,7 @@ getLevel =
     }
 
 setLevelField :: Level -> (String, String) -> Level
-setLevelField level ("required_coins", value) = level {requiredCoins = read value}
+setLevelField level ("required_coins", value') = level {requiredCoins = read value'}
 setLevelField _ (key, _) = error ("Undefined Level key: \"" ++ key ++ "\"")
 
 levelArraysParser :: Level -> Parser Level
@@ -72,8 +72,3 @@ parseLevels = do
   many1 parseArrayElement <* handleUnparsedConfig
   where
     parseArrayElement = try (whitespace >> char '|' >> parseLevel)
-
-main :: IO ()
-main = do
-  result <- parseWithLeftOver parseLevels "./levels/example2.txt"
-  print result

@@ -12,7 +12,7 @@ getCoin =
     }
 
 setCoinField :: Coin -> (String, String) -> Coin
-setCoinField coin ("position", value) = coin {coinCoordinate = read ("(" ++ value ++ ")")}
+setCoinField coin ("position", value') = coin {coinCoordinate = read ("(" ++ value' ++ ")")}
 setCoinField coin ("value", value') = coin {value = read value'}
 setCoinField _ (key, _) = error ("Undefined Coin key: \"" ++ key ++ "\"")
 

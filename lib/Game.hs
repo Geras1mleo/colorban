@@ -1,16 +1,11 @@
-module Game (move, isSolved, selectNextRobot, selectPreviousRobot) where
+module Game (move, isSolved, selectNextRobot, selectPreviousRobot, getSelectedRobot) where
 
 import BoardObject (BoardObject (..))
 import Data.List (elemIndex)
 import Data.Maybe (fromJust)
 import GameData (Button (isPressed), Coin (value), Coordinate, Crate (ccoordinate, weight), Direction, Door (buttons, isOpened), Layout (tiles), Level (coins, collectedCoins, crates, doors, layout, robots, spots, storages, requiredCoins), Robot (rcolor, rcoordinate, selected, strength), Spot (durability, spcolor), Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall), decrement, positive)
 import Static (down, left, right, up)
-
-replaceFirst :: (Eq a) => a -> a -> [a] -> [a]
-replaceFirst _ _ [] = []
-replaceFirst old new (x : xs)
-  | x == old = new : xs
-  | otherwise = x : replaceFirst old new xs
+import Helper (replaceFirst)
 
 filter' :: (BoardObject a) => Coordinate -> [a] -> [a]
 filter' coord = filter (\c -> coordinate c == coord)
@@ -146,12 +141,7 @@ handleCoins level =
 
 move :: Level -> Direction -> Level
 move level direction
-  | canPush' =
-      let level' = moveRobot level robot coord direction
-       in let level'' = handleSpots level'
-           in let level''' = handleDoorsAndButtons level''
-               in let level'''' = handleCoins level'''
-                   in level''''
+  | canPush' = handleCoins $ handleDoorsAndButtons $ handleSpots $ moveRobot level robot coord direction
   | otherwise = level
   where
     robot = getSelectedRobot level

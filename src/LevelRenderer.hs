@@ -1,44 +1,27 @@
 {-# LANGUAGE TupleSections #-}
 
-module LevelRenderer (renderLevel, rgb, rgba, Textures) where
+module LevelRenderer (renderLevel, renderSolvedCaption) where
 
 import BoardObject (BoardObject (coordinate))
-import GameData(Button (isPressed), Coordinate, Door (buttons), Layout (tiles), Level (coins, crates, doors, layout, platforms, robots, spots, storages), height, width)
-import Data.List (find)
 import Data.Maybe (fromMaybe)
-import Drawable (Drawable (draw, getImagePath))
-import Graphics.Gloss (Color, Picture (Color, Line, Pictures), Point, makeColorI, rectangleSolid, scale, translate)
-import Static (fieldSize, scaleBy, thickLineOffsetsCount, assetsFolder)
-
-type Textures = [(FilePath, Picture)]
-
-rgb :: (Int, Int, Int) -> Color
-rgb (r, g, b) = rgba (r, g, b, 255)
-
-rgba :: (Int, Int, Int, Int) -> Color
-rgba (r, g, b, a) = makeColorI r g b a
-
-convertToCartesian :: Level -> Coordinate -> (Float, Float)
-convertToCartesian l (x, y) =
-  ( fromIntegral $ (x - (width l `div` 2)) * fieldSize + xHalf,
-    fromIntegral $ ((-y) + (height l `div` 2)) * fieldSize - yHalf
-  )
-  where
-    xHalf = ((width l + 1) `mod` 2) * (fieldSize `div` 2)
-    yHalf = ((height l + 1) `mod` 2) * (fieldSize `div` 2)
+import Drawable (Drawable (draw, getImagePath), Textures)
+import GameData (Button (isPressed), Door (buttons), GameData, Layout (tiles), Level (coins, collectedCoins, crates, doors, layout, platforms, requiredCoins, robots, spots, storages), getPlayingLevel, height, width)
+import Graphics.Gloss (Picture, Point, rectangleSolid, scale, translate, yellow)
+import Graphics.Gloss.Data.Picture (Picture (..))
+import RenderHelper (boldText, convertToCartesian', rgb, rgba)
+import Static (assetsFolder, fieldSize, scaleBy, thickLineOffsetsCount)
 
 getImage' :: (Drawable a) => Textures -> a -> Picture
-getImage' textures obj =
-  snd $
-    fromMaybe (error ("Texture not found: " ++ path)) $
-      find (\(path', _) -> path' == path) textures
+getImage' textures obj = image
   where
     path = assetsFolder ++ getImagePath obj
+    maybeImage = lookup path textures
+    image = fromMaybe (error ("Texture not found: " ++ path)) maybeImage
 
 makeImage :: (Drawable a) => Textures -> Level -> a -> Picture
-makeImage textures l boardObj = translate x y (draw boardObj image)
+makeImage textures level boardObj = translate x y (draw boardObj textures image)
   where
-    (x, y) = convertToCartesian l $ coordinate boardObj
+    (x, y) = convertToCartesian' level $ coordinate boardObj
     image = getImage' textures boardObj
 
 -- Dark magic here
@@ -57,29 +40,52 @@ makeDoorButtonConnection level = drawLine <$> coords
         coordWithState door = (\b -> (coordinate b, isPressed b)) <$> buttons door
     drawLine (c1, (c2, isPressed')) = colorizeLine $ thickLine 1 p1 p2
       where
-        p1 = convertToCartesian level c1
-        p2 = convertToCartesian level c2
+        p1 = convertToCartesian' level c1
+        p2 = convertToCartesian' level c2
         colorizeLine p
           | isPressed' = Color (rgba (0, 128, 0, 60)) p
           | otherwise = Color (rgba (255, 0, 0, 60)) p
 
 renderFields :: Textures -> Level -> Picture
-renderFields textures l = do
-  let tiles' = makeImage textures l <$> tiles (layout l)
-  let robots' = makeImage textures l <$> robots l
-  let storages' = makeImage textures l <$> storages l
-  let crates' = makeImage textures l <$> crates l
-  let spots' = makeImage textures l <$> spots l
-  let doors' = makeImage textures l <$> doors l
-  let buttons' = makeImage textures l <$> concatMap buttons (doors l)
-  let platforms' = makeImage textures l <$> platforms l
-  let coins' = makeImage textures l <$> coins l
-  let lines' = makeDoorButtonConnection l
+renderFields textures level = do
+  let tiles' = makeImage' <$> tiles (layout level)
+  let robots' = makeImage' <$> robots level
+  let storages' = makeImage' <$> storages level
+  let crates' = makeImage' <$> crates level
+  let spots' = makeImage' <$> spots level
+  let doors' = makeImage' <$> doors level
+  let buttons' = makeImage' <$> concatMap buttons (doors level)
+  let platforms' = makeImage' <$> platforms level
+  let coins' = makeImage' <$> coins level
+  let lines' = makeDoorButtonConnection level
   Pictures (lines' ++ tiles' ++ coins' ++ storages' ++ spots' ++ doors' ++ buttons' ++ crates' ++ platforms' ++ robots')
+  where
+    makeImage' :: (Drawable a) => a -> Picture
+    makeImage' = makeImage textures level
 
 renderBackground :: Level -> Picture
-renderBackground level =
-  Color (rgb (229, 229, 229)) $ rectangleSolid (fromIntegral $ width level * fieldSize) (fromIntegral $ height level * fieldSize)
+renderBackground level = Color (rgb (229, 229, 229)) $ rectangleSolid width' height'
+  where
+    width' = fromIntegral $ width level * fieldSize
+    height' = fromIntegral $ height level * fieldSize
+
+renderHeader :: Textures -> Level -> Picture
+renderHeader _ level = Color yellow $ Pictures [requiredCoinsPic', collectedCoinsPic']
+  where
+    (x, y) = convertToCartesian' level (1, 0)
+    scale' = scale 0.15 0.15
+    requiredCoinsPic = boldText ("Required coins: " ++ show (requiredCoins level))
+    collectedCoinsPic = boldText ("Collected coins: " ++ show (collectedCoins level))
+    requiredCoinsPic' = translate x y (scale' requiredCoinsPic)
+    collectedCoinsPic' = translate x (y - 20) (scale' collectedCoinsPic)
+
+renderSolvedCaption :: GameData -> Picture
+renderSolvedCaption gdata = Color (rgb (0, 228, 255)) $ translate x y (scale' pic)
+  where
+    level = getPlayingLevel gdata
+    scale' = scale 0.2 0.2
+    (x, y) = convertToCartesian' level (0, height level + 1)
+    pic = boldText "Level solved! Press enter to go to next level..."
 
 renderLevel :: Textures -> Level -> Picture
-renderLevel textures level = scale scaleBy scaleBy $ Pictures [renderBackground level, renderFields textures level]
+renderLevel textures level = scale scaleBy scaleBy $ Pictures [renderBackground level, renderFields textures level, renderHeader textures level]

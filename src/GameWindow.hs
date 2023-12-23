@@ -1,16 +1,25 @@
 module GameWindow (render, handleInput, step) where
 
-import Data.List (find)
-import Data.Maybe (fromJust)
+import Control.Monad (guard)
+import Data.List (elemIndex, find)
+import Data.Maybe (fromJust, fromMaybe)
 import Game (isSolved, move, selectNextRobot, selectPreviousRobot)
-import GameData (Direction, GameData (..), Level (levelName), WindowType (EndGameWindow, MenuWindow), getPlayingLevel)
-import Graphics.Gloss (Picture)
-import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (Char, SpecialKey), KeyState (Down), SpecialKey (..))
-import LevelRenderer (Textures, renderLevel)
+import GameData (Direction, GameData (..), Level (levelName), WindowType (EndGameWindow, GameWindow, MenuWindow), getPlayingLevel)
+import Graphics.Gloss (Picture (Blank, Pictures))
+import Helper ((!?))
+import LevelRenderer (renderLevel, renderSolvedCaption)
+import Drawable (Textures)
 import Static (down, left, right, up)
+import RenderHelper ( isKey, isKey' )
+import Graphics.Gloss.Interface.IO.Interact (SpecialKey(..))
+import Graphics.Gloss.Interface.IO.Game (Event)
 
 render :: Textures -> GameData -> Picture
-render textures = renderLevel textures . getPlayingLevel
+render textures gdata = Pictures [renderLevel textures $ getPlayingLevel gdata, solvedPic]
+  where
+    solvedPic
+      | playingLevelSolved gdata = renderSolvedCaption gdata
+      | otherwise = Blank
 
 handleInput :: Event -> GameData -> GameData
 handleInput event gdata = updateLevel
@@ -22,36 +31,50 @@ handleInput event gdata = updateLevel
       | isKey KeyUp event = move' gdata up
       | isKey KeyLeft event = move' gdata left
       | isKey KeyDown event = move' gdata down
+      | isKey KeyEnter event = goToNextLevel gdata
       | isKey' 'n' event = setLevel $ selectNextRobot level
       | isKey' 'p' event = setLevel $ selectPreviousRobot level
-      | isKey' 'r' event = setLevel $ resetLevel gdata
+      | isKey' 'r' event = resetLevel gdata
       | isKey' 'm' event = goToMenu gdata
       | otherwise = gdata
 
 move' :: GameData -> Direction -> GameData
-move' gdata dir = setLevel'
+move' gdata dir =
+  gdata
+    { windowType = windowType',
+      playingLevel = Just newLevel,
+      playingLevelSolved = isLevelSolved
+    }
   where
     newLevel = move (getPlayingLevel gdata) dir
-    solved = isSolved newLevel
-    setLevel'
-      | solved = gdata {windowType = EndGameWindow, playingLevel = Just newLevel}
-      | otherwise = gdata {playingLevel = Just newLevel}
+    isLevelSolved = isSolved newLevel
+    windowType' = fromMaybe GameWindow $ do
+      guard isLevelSolved
+      thisLevel <- playingLevel gdata
+      index <- elemIndex thisLevel $ levels gdata
+      guard $ index == (length (levels gdata) - 1)
+      return EndGameWindow
 
-resetLevel :: GameData -> Level
-resetLevel gdata = fromJust $ do
+resetLevel :: GameData -> GameData
+resetLevel gdata = gdata {playingLevel = Just $ resetGetLevel gdata, playingLevelSolved = False}
+
+resetGetLevel :: GameData -> Level
+resetGetLevel gdata = fromJust $ do
   thisLevel <- playingLevel gdata
   find (\l -> levelName l == levelName thisLevel) $ levels gdata
 
 goToMenu :: GameData -> GameData
 goToMenu gdata = gdata {windowType = MenuWindow}
 
-isKey :: SpecialKey -> Event -> Bool
-isKey k1 (EventKey (SpecialKey k2) Down _ _) = k1 == k2
-isKey _ _ = False
-
-isKey' :: Char -> Event -> Bool
-isKey' k1 (EventKey (Char k2) Down _ _) = k1 == k2
-isKey' _ _ = False
+goToNextLevel :: GameData -> GameData
+goToNextLevel gdata
+  | playingLevelSolved gdata = gdata {playingLevel = Just nextLevel, playingLevelSolved = False}
+  | otherwise = gdata
+  where
+    nextLevel = fromMaybe (getPlayingLevel gdata) $ do
+      thisLevel <- playingLevel gdata
+      index <- elemIndex thisLevel $ levels gdata
+      levels gdata !? (index + 1)
 
 step :: Float -> GameData -> GameData
 step _ l = l

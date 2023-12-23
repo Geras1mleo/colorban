@@ -22,8 +22,6 @@ class BoardObject b where
   color :: b -> FColor
   color _ = None
 
--- TODO orientation?
-
 instance BoardObject Robot where
   coordinate :: Robot -> Coordinate
   coordinate = rcoordinate

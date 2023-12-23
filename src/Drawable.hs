@@ -1,11 +1,15 @@
 {-# LANGUAGE InstanceSigs #-}
 
-module Drawable (Drawable (..)) where
+module Drawable (Drawable (..), Textures) where
 
 import BoardObject (BoardObject (..))
-import GameData(Button, Coin (value), Crate (weight), Door (isOpened), IntF (..), Platform, Robot (strength), Spot (durability), Storage, Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall))
 import Data.Char (toLower)
+import Data.Maybe (fromMaybe)
+import GameData (Button, Coin (value), Crate (weight), Door (isOpened), IntF (..), Platform, Robot (selected, strength), Spot (durability), Storage, Tile (Tile), TileType (Empty, TileDown, TileLeft, TileRight, TileUp, Wall))
 import Graphics.Gloss.Data.Picture (Picture (Pictures, Scale, Text, Translate))
+import Static (assetsFolder)
+
+type Textures = [(FilePath, Picture)]
 
 dropPointZero :: String -> String
 dropPointZero num = if mantissa == ".0" then intPart else num
@@ -33,18 +37,26 @@ createCaptionRightCorner pic str = Pictures [pic, Translate 10 (-20) $ createCap
 createCaptionCenter :: Picture -> String -> Picture
 createCaptionCenter pic str = Pictures [pic, Translate (-3) (-4) $ createCaption str]
 
+addSelectedBorder :: Bool -> Textures -> Picture -> Picture
+addSelectedBorder selected' textures pic
+  | not selected' = pic
+  | otherwise = Pictures [pic, border]
+  where
+    maybeBorder = lookup (assetsFolder ++ "active_50x50.bmp") textures
+    border = fromMaybe (error ("Selected robot border not found: " ++ show textures)) maybeBorder
+
 class (BoardObject a) => Drawable a where
   getImagePath :: a -> String
   getImagePath obj = typeName ++ "s/" ++ typeName ++ "_" ++ colorName ++ "_50x50.bmp"
     where
       typeName = map toLower (tail $ show $ otype obj)
       colorName = map toLower (show $ color obj)
-  draw :: a -> Picture -> Picture
-  draw _ p = p
+  draw :: a -> Textures -> Picture -> Picture
+  draw _ _ p = p
 
 instance Drawable Robot where
-  draw :: Robot -> Picture -> Picture
-  draw robot pic = createCaptionRightCorner pic $ showDouble $ strength robot
+  draw :: Robot -> Textures -> Picture -> Picture
+  draw robot textures pic = addSelectedBorder (selected robot) textures $ createCaptionRightCorner pic $ showDouble $ strength robot
 
 instance Drawable Tile where
   getImagePath :: Tile -> String
@@ -59,12 +71,12 @@ instance Drawable Tile where
 instance Drawable Storage
 
 instance Drawable Crate where
-  draw :: Crate -> Picture -> Picture
-  draw crate pic = createCaptionRightCorner pic $ showDouble $ weight crate
+  draw :: Crate -> Textures -> Picture -> Picture
+  draw crate _ pic = createCaptionRightCorner pic $ showDouble $ weight crate
 
 instance Drawable Spot where
-  draw :: Spot -> Picture -> Picture
-  draw spot pic = createCaptionCenter pic $ showIntF $ durability spot
+  draw :: Spot -> Textures -> Picture -> Picture
+  draw spot _ pic = createCaptionCenter pic $ showIntF $ durability spot
 
 instance Drawable Door where
   getImagePath :: Door -> String
@@ -84,5 +96,5 @@ instance Drawable Coin where
   getImagePath :: Coin -> String
   -- getImagePath _ = "objects/coin_50x50.bmp"
   getImagePath _ = "objects/coin_2_50x50.bmp"
-  draw :: Coin -> Picture -> Picture
-  draw coin pic = createCaptionCenter pic $ show $ value coin
+  draw :: Coin -> Textures -> Picture -> Picture
+  draw coin _ pic = createCaptionCenter pic $ show $ value coin

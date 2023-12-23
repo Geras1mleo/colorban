@@ -4,7 +4,7 @@ import Data.Char (isSpace, toLower, toUpper)
 import Data.Functor (void, ($>))
 import Data.List (dropWhileEnd)
 import Text.Parsec (anyChar, anyToken, between, char, count, eof, many, many1, manyTill, noneOf, oneOf, parse, string, try)
-import Text.Parsec.Error
+import Text.Parsec.Error (ParseError)
 import Text.Parsec.Prim ((<|>))
 import Text.Parsec.String (Parser)
 
@@ -62,7 +62,7 @@ parseFieldWithPrefix :: Char -> Parser (String, String)
 parseFieldWithPrefix prefix = do
   whitespace
   void $ char prefix
-  key <- between (char ' ') (char ' ') (many1 (noneOf " ")) -- TODO manyTill
+  key <- between (char ' ') (char ' ') (many1 (noneOf " ")) -- TODO test with manyTill
   whitespace
   value <- between (char '(') (char ')') (many1 (noneOf ")"))
   return (trim key, trim value)

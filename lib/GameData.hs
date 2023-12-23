@@ -176,14 +176,22 @@ data Level = Level
     requiredCoins :: Int,
     collectedCoins :: Int
   }
-  deriving (Eq, Show)
+  deriving (Show)
+
+instance Eq Level where
+  (==) :: Level -> Level -> Bool
+  (==) a b = levelName a == levelName b
+  (/=) :: Level -> Level -> Bool
+  (/=) a b = not $ a == b
+
 
 data WindowType = MenuWindow | GameWindow | EndGameWindow
 
 data GameData = GameData
   { windowType :: WindowType,
     levels :: [Level],
-    playingLevel :: Maybe Level
+    playingLevel :: Maybe Level,
+    playingLevelSolved :: Bool
   }
 
 getPlayingLevel :: GameData -> Level
